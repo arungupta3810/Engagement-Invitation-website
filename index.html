@@ -93,6 +93,20 @@ body{background:var(--bg);color:var(--ink);font-family:'Cormorant Garamond',Geor
   body{display:flex;justify-content:center;background:#12040c}
   #stage{width:min(100%,440px);flex:none;box-shadow:0 0 70px rgba(0,0,0,.65)}
 }
+.rv{font-family:inherit;font-weight:500;color:var(--gold2);background:rgba(42,10,28,.35);border:1px solid rgba(216,180,106,.65);border-radius:14px;padding:.8rem 1.5rem;margin-top:1.6rem;cursor:pointer;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;max-width:100%}
+.rv:focus-visible{outline:2px solid var(--gold2);outline-offset:4px}
+.rv-date{display:block;filter:blur(11px);transition:filter 1.6s ease}
+.rv:not(.on){animation:rvp 2.2s ease-in-out infinite}
+@keyframes rvp{50%{box-shadow:0 0 22px rgba(242,220,160,.5)}}
+.rv.on{cursor:default;border-color:var(--gold2)}
+.rv.on .rv-date{filter:blur(0)}
+.rv.on::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,240,190,.55) 50%,transparent 70%);transform:translateX(-100%);animation:rvs 1.5s ease .4s forwards}
+@keyframes rvs{to{transform:translateX(100%)}}
+.rv-hint{margin-top:1.2rem;font-size:clamp(1rem,3cqw,1.3rem);letter-spacing:.12em;color:var(--gold2);text-transform:uppercase}
+.rv-hint.done{opacity:0!important;transition:opacity .5s}
+.rv-count{margin-top:1.3rem;font-size:clamp(1.2rem,3.8cqw,1.7rem);font-style:italic;color:var(--blush);opacity:0;transition:opacity 1.4s ease .8s}
+.rv-count.on{opacity:1}
+@media(prefers-reduced-motion:reduce){.rv:not(.on),.rv.on::after{animation:none}.rv-date{transition:none}}
 @media(prefers-reduced-motion:reduce){.glow,.sp,.sweep{animation:none}.sp{opacity:.9;transform:none}.ring2{transition:none}}
 @media(prefers-reduced-motion:reduce){#cue svg{animation:none}}
 @media(prefers-reduced-motion:reduce){.e-card,.e-flap{transition-duration:.01s;transition-delay:0s}.e-hint{animation:none}}
@@ -142,9 +156,11 @@ body{background:var(--bg);color:var(--ink);font-family:'Cormorant Garamond',Geor
 </svg></div>
     <p class="line yes gold">And she said Yes.</p>
   </div>
-  <div class="scene" data-t="4000">
+  <div class="scene" data-t="0" id="dateScene">
     <p class="line script gold">Save the Date</p>
-    <p class="line" style="margin-top:1.4rem">Monday, 2 November 2026</p>
+    <button class="line rv" id="rv" type="button" aria-label="Tap to reveal the date"><span class="rv-date">Monday, 2 November 2026</span></button>
+    <p class="line rv-hint" id="rvHint">Tap to reveal the date</p>
+    <p class="rv-count" id="rvCount"></p>
   </div>
   <div class="scene" data-t="0" id="formal">
     <div class="art sm" role="img" aria-label="Illustration of the couple"></div>
@@ -155,7 +171,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Cormorant Garamond',Geor
     <p class="line script gold" id="bn">Sunita Chouhan</p>
     <div class="rule line"></div>
     <p class="line det"><b id="dt">Date</b><br><span id="dy">Day</span><br><span id="vn">Venue</span>, <span id="ct">City</span></p>
-    <p class="line small" style="margin-top:.6rem">52MW+4FX, Diva Agasan Rd, B.R. Nagar,<br>Sidhivinyak Nagar, Diva, Thane, Maharashtra 400612</p>
+    <p class="line small" style="margin-top:.6rem">Agasan Rd, B.R. Nagar,<br>Sidhivinyak Nagar, Diva, Thane, Maharashtra 400612</p>
     <p class="line"><a class="map" href="https://www.google.com/maps/search/?api=1&amp;query=Akansha%20Banquet%20Hall%20Diva&amp;query_place_id=ChIJ3aTe0za_5zsRw707KmqbVUE" target="_blank" rel="noopener">View location on Google Maps</a></p>
     <p class="line small" style="margin-top:1.4rem"><em>Two hearts, one promise,<br>and a beautiful beginning.</em></p>
     <p class="line small" style="margin-top:1.6rem">Join us as we begin our forever.</p>
@@ -168,7 +184,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Cormorant Garamond',Geor
     <div class="e-scene">
       <button class="e-env" id="envBtn" type="button" aria-label="Open the invitation">
         <div class="e-back"></div>
-        <div class="e-card"><small>Engagement</small><div class="script gold">Arun &amp; Sunita</div><small>2 November 2026</small></div>
+        <div class="e-card"><small>Engagement</small><div class="script gold">Arun &amp; Sunita</div><small>Together with our families</small></div>
         <div class="e-pocket"></div>
         <div class="e-flap"></div>
         <div class="e-seal">A&amp;S</div>
@@ -188,6 +204,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Cormorant Garamond',Geor
     lines.forEach(function(l){l.classList.remove('show')});
     lines.forEach(function(l,k){later(function(){l.classList.add('show')},500+k*(i===4?650:1200))});
     var t=+scenes[i].dataset.t;
+    if(i===3)later(function(){reveal()},9000);
     if(t&&i<scenes.length-1)later(function(){show(i+1)},t);
   }
   function play(){clear();show(0)}
@@ -254,6 +271,21 @@ body{background:var(--bg);color:var(--ink);font-family:'Cormorant Garamond',Geor
     var s=!!(seen&&more);cue.classList.toggle('show',s);cf.classList.toggle('show',s);
   }
   formal.addEventListener('scroll',cueCheck,{passive:true});window.addEventListener('resize',cueCheck);setInterval(cueCheck,300);
+  var rv=document.getElementById('rv'),rvh=document.getElementById('rvHint'),rvc=document.getElementById('rvCount'),rvDone=false;
+  function reveal(){
+    if(rvDone)return;rvDone=true;
+    rv.classList.add('on');rvh.classList.add('done');
+    var ms=Date.UTC(2026,10,2,10,30)-Date.now();
+    if(ms>0){var d=Math.ceil(ms/864e5);rvc.textContent=d===1?'Just 1 day to go':d+' days to go'}
+    rvc.classList.add('on');
+    for(var k=0;k<22;k++){
+      var p=document.createElement('span');p.className='petal'+(k%2?' g':'');
+      p.style.left=(10+Math.random()*80)+'%';p.style.animationDuration=(3+Math.random()*3)+'s';p.style.animationDelay=(Math.random()*.6)+'s';
+      stage.appendChild(p);(function(n){setTimeout(function(){n.remove()},7500)})(p);
+    }
+    later(function(){show(4)},3800);
+  }
+  rv.addEventListener('click',reveal);
   apply();petals();
 })();
 </script>
