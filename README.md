@@ -1,4 +1,4 @@
-# Arun & Sunita – Engagement Invitation Website
+# Engagement Invitation Website
 
 A single-page animated engagement invitation with an interactive envelope, background music and a Google Maps link. It has no build step and needs no server code, so it can be hosted on any static host (Vercel, Netlify, GitHub Pages).
 
